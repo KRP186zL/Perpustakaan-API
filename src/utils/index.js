@@ -6,8 +6,8 @@ const formatUserDetailsPayload = (payload) => {
   } = payload;
 
   nim = nim ? parseInt(nim, 10) : 0;
-  prodiId = parseInt(prodiId, 10);
-  fakultasId = parseInt(fakultasId, 10);
+  prodiId = prodiId ? parseInt(prodiId, 10) : 0;
+  fakultasId = fakultasId ? parseInt(fakultasId, 10) : 0;
 
   return {
     ...payload,
@@ -17,6 +17,18 @@ const formatUserDetailsPayload = (payload) => {
   };
 };
 
+const formatBooksPayload = (payload) => {
+  let { halaman } = payload;
+
+  halaman = halaman ? parseInt(halaman, 10) : 0;
+
+  return {
+    ...payload,
+    halaman,
+  };
+};
+
 module.exports = {
   formatUserDetailsPayload,
+  formatBooksPayload,
 };

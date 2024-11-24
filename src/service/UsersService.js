@@ -9,6 +9,7 @@ const ClientError = require('../error/ClientError');
 const NotFoundError = require('../error/NotFoundError');
 const AuthenticationError = require('../error/AuthenticationError');
 const AuthorizationError = require('../error/AuthorizationError');
+const ConflictError = require('../error/ConflictError');
 
 class UsersService {
   #pool;
@@ -26,7 +27,7 @@ class UsersService {
     const result = await this.#pool.query(query);
 
     if (result.rowCount) {
-      throw new ClientError(`username ${username} sudah digunakan`);
+      throw new ConflictError(`username ${username} sudah digunakan`);
     }
   }
 
@@ -44,7 +45,7 @@ class UsersService {
       if (userId === idUser) {
         throw new ClientError(`Email ${email} sudah terdaftar diakun anda`);
       }
-      throw new ClientError(`Email ${email} sudah digunakan`);
+      throw new ConflictError(`Email ${email} sudah digunakan`);
     }
   }
 
@@ -61,18 +62,17 @@ class UsersService {
     }
   }
 
-  async authorizeUserAction(credential, targetId = null) {
+  async authorizeUserAction({ userId, role }, targetId = null) {
     if (targetId) {
       await this.verifyUserId(targetId);
     }
 
-    const { userId, role } = credential;
     if (userId !== targetId && role !== 'admin') {
       throw new AuthorizationError('Anda tidak memiliki izin');
     }
   }
 
-  async verifyUserCredential(username, email, password) {
+  async verifyUserCredential({ username, email, password }) {
     const query = {
       text: 'SELECT user_id as "userId", username, password, role FROM users WHERE username = $1 OR email = $2',
       values: [username, email],
@@ -106,7 +106,7 @@ class UsersService {
     return result.rowCount;
   }
 
-  async postUser(username, password, email) {
+  async postUser({ username, password, email }) {
     const id = `user-${nanoid(16)}`;
     const hashedPassword = await bcrypt.hash(password, 15);
     const role = !(await this.getRowsUsersTabel()) ? 'admin' : 'user';
@@ -129,7 +129,7 @@ class UsersService {
   }
 
   async getUsers() {
-    const query = `SELECT users.username, users.email, user_details.nama
+    const query = `SELECT users.user_id as "userId", users.username, users.email, user_details.nama
     FROM users
     LEFT JOIN user_details
     ON users.user_id = user_details.user_id
@@ -140,7 +140,7 @@ class UsersService {
     return result.rows;
   }
 
-  async putUserById(userId, password, email) {
+  async putUserById(userId, { password, email }) {
     let hashedPassword = null;
     if (password) {
       hashedPassword = await bcrypt.hash(password, 15);
@@ -149,9 +149,9 @@ class UsersService {
       text: `UPDATE users
       SET
       password = COALESCE($1, password), 
-      email = COALESCE($2, email),
-      WHERE user_id = $4
-      RETURNING *`,
+      email = COALESCE($2, email)
+      WHERE user_id = $3
+      RETURNING *`, // matikan returning dan ubah message
       values: [hashedPassword, email, userId],
     };
 
@@ -192,7 +192,7 @@ class UsersService {
       if (userId === idUser) {
         throw new ClientError(`Nim ${nim} sudah terdaftar di akun anda`);
       }
-      throw new ClientError(`Nim ${nim} sudah digunakan`);
+      throw new ConflictError(`Nim ${nim} sudah digunakan`);
     }
   }
 
@@ -259,7 +259,7 @@ class UsersService {
       tanggal_lahir = COALESCE($6, tanggal_lahir)
       WHERE user_id = $7
       RETURNING *
-      `,
+      `, // matikan returning dan ubah message
       values: [nim, nama, prodiId, fakultasId, tempatLahir, tanggalLahir, userId],
     };
 
