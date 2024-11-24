@@ -39,6 +39,7 @@ const PostUserDetailsPayloadSchema = Joi.object({
     .required(),
 
   nim: Joi.number()
+    .empty(0)
     .required(),
 
   nama: Joi.string()
@@ -47,9 +48,11 @@ const PostUserDetailsPayloadSchema = Joi.object({
     .required(),
 
   prodiId: Joi.number()
+    .empty(0)
     .required(),
 
   fakultasId: Joi.number()
+    .empty(0)
     .required(),
 
   tempatLahir: Joi.string()
@@ -59,6 +62,7 @@ const PostUserDetailsPayloadSchema = Joi.object({
 
   tanggalLahir: Joi.date()
     .iso()
+    .empty('')
     .required(),
 });
 
@@ -73,9 +77,11 @@ const PutUserDetailsPayloadSchema = Joi.object({
     .optional(),
 
   prodiId: Joi.number()
+    .empty(0)
     .optional(),
 
   fakultasId: Joi.number()
+    .empty(0)
     .optional(),
 
   tempatLahir: Joi.string()
@@ -85,6 +91,7 @@ const PutUserDetailsPayloadSchema = Joi.object({
 
   tanggalLahir: Joi.date()
     .iso()
+    .empty('')
     .optional(),
 });
 

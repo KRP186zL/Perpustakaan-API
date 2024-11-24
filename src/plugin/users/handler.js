@@ -16,13 +16,7 @@ class UsersHandler {
   async postUserHandler(request, h) {
     const payloadValidated = this.#validator.validatePostUsersPayload(request.payload);
 
-    const {
-      username,
-      password,
-      email,
-    } = payloadValidated;
-
-    const userId = await this.#service.postUser(username, password, email);
+    const userId = await this.#service.postUser(payloadValidated);
 
     const response = h.response({
       status: 'success',
@@ -55,10 +49,9 @@ class UsersHandler {
     const credential = request.auth.credentials;
 
     const payloadValidated = this.#validator.validatePutUsersPayload(request.payload);
-    const { password, email } = payloadValidated;
 
     await this.#service.authorizeUserAction(credential, userId);
-    const data = await this.#service.putUserById(userId, password, email);
+    const data = await this.#service.putUserById(userId, payloadValidated);
 
     const response = h.response({
       status: 'success',

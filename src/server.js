@@ -10,6 +10,9 @@ const Config = require('../utils/config');
 // Error
 const ClientError = require('./error/ClientError');
 
+// Token Manager
+const TokenManager = require('./token/TokenManager');
+
 // Users Plugin
 const usersPlugin = require('./plugin/users');
 const UsersService = require('./service/UsersService');
@@ -20,12 +23,15 @@ const authenticationPlugin = require('./plugin/authentication');
 const AuthenticationService = require('./service/AuthenticationService');
 const ValidatorAuthentication = require('./validator/authentication');
 
-// Token Manager
-const TokenManager = require('./token/TokenManager');
+// Books Plugin
+const booksPlugin = require('./plugin/books');
+const BooksService = require('./service/BooksService');
+const ValidatorBooks = require('./validator/books');
 
 (async () => {
   const usersService = new UsersService();
   const authenticationService = new AuthenticationService();
+  const booksService = new BooksService();
 
   const server = Hapi.server({
     port: Config.app.port,
@@ -67,6 +73,7 @@ const TokenManager = require('./token/TokenManager');
         validator: ValidatorUsers,
       },
     },
+
     {
       plugin: authenticationPlugin,
       options: {
@@ -74,6 +81,15 @@ const TokenManager = require('./token/TokenManager');
         usersService,
         tokenManager: TokenManager,
         validator: ValidatorAuthentication,
+      },
+    },
+
+    {
+      plugin: booksPlugin,
+      options: {
+        booksService,
+        usersService,
+        validator: ValidatorBooks,
       },
     },
   ]);

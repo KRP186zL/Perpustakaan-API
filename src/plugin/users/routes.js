@@ -69,7 +69,6 @@ const routes = (handler) => [
       auth: 'perpustakaan_jwt',
     },
   },
-
 ];
 
 module.exports = routes;

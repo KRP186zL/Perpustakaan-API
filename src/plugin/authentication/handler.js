@@ -21,9 +21,7 @@ class AuthenticationHandler {
   async postAuthenticationHandler(request, h) {
     const validatedPayload = this.#validator.validatePostAuthenticationPayload(request.payload);
 
-    const { username, email, password } = validatedPayload;
-
-    const payloadToken = await this.#usersService.verifyUserCredential(username, email, password);
+    const payloadToken = await this.#usersService.verifyUserCredential(validatedPayload);
     const accessToken = this.#tokenManager.generateAccessToken(payloadToken);
     const refreshToken = this.#tokenManager.generateRefreshToken(payloadToken);
     console.log(accessToken);
