@@ -73,10 +73,10 @@ class BooksService {
     return result.rows[0];
   }
 
-  async getBooks() {
-    const query = 'SELECT buku_id as "bukuId", judul, halaman, cover, quantity FROM buku';
+  async getBooks(search) {
+    const query = 'SELECT buku_id as "bukuId", judul, halaman, cover, quantity FROM buku WHERE judul ILIKE $1 OR pengarang ILIKE $1';
 
-    const result = await this.#pool.query(query);
+    const result = await this.#pool.query(query, [`%${search}%`]);
 
     return result.rows;
   }
@@ -141,12 +141,6 @@ class BooksService {
       throw new NotFoundError('Gagal menghapus buku. Id buku tidak ditemukan');
     }
   }
-
-  // async searchBooksHandler(word) {
-  //   const query = {
-  //     text: 'SELECT buku_id AS "bukuId",'
-  //   }
-  // }
 }
 
 module.exports = BooksService;
