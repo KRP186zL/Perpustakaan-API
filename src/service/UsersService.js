@@ -128,13 +128,15 @@ class UsersService {
     return result.rows[0].userId;
   }
 
-  async getUsers() {
-    const query = `SELECT users.user_id as "userId", users.username, users.email, user_details.nama
-    FROM users
-    LEFT JOIN user_details
-    ON users.user_id = user_details.user_id
-    WHERE users.role = 'user'`;
-
+  async getUsers(word) {
+    const query = {
+      text: `SELECT u.user_id as "userId", u.username, u.email, ud.nama
+    FROM users u
+    LEFT JOIN user_details ud
+    ON u.user_id = ud.user_id
+    WHERE u.role = 'user' AND (ud.nama ILIKE $1 OR u.username ILIKE $1 OR u.email ILIKE $1)`,
+      values: [`%${word}%`],
+    };
     const result = await this.#pool.query(query);
 
     return result.rows;
@@ -210,6 +212,8 @@ class UsersService {
       values: [userId, nim, nama, prodiId, fakultasId, tempatLahir, tanggalLahir],
     };
 
+    await this.verifyNim(nim);
+
     const result = await this.#pool.query(query);
 
     if (!result.rowCount) {
@@ -228,9 +232,9 @@ class UsersService {
       prodi.nama_prodi as "prodi",
       fakultas.nama_fakultas  as "fakultas"
       FROM user_details
-      INNER JOIN prodi
+      LEFT JOIN prodi
       ON user_details.prodi_id = prodi.prodi_id
-      INNER JOIN fakultas
+      LEFT JOIN fakultas
       ON user_details.fakultas_id = fakultas.fakultas_id
       WHERE user_details.user_id = $1`,
       values: [userId],

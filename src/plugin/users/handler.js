@@ -29,9 +29,11 @@ class UsersHandler {
   }
 
   async getUsersHandler(request, h) {
+    const { search = '' } = request.query;
     const credential = request.auth.credentials;
+
     await this.#service.authorizeUserAction(credential);
-    const users = await this.#service.getUsers();
+    const users = await this.#service.getUsers(search);
 
     const response = h.response({
       status: 'success',

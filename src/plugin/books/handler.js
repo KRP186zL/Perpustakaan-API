@@ -37,8 +37,9 @@ class BooksHandler {
     return response;
   }
 
-  async getBooksHandler(_request, h) {
-    const books = await this.#booksService.getBooks();
+  async getBooksHandler(request, h) {
+    const { search = '' } = request.query;
+    const books = await this.#booksService.getBooks(search);
 
     const response = h.response({
       status: 'success',
